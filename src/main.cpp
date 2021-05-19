@@ -12,7 +12,7 @@
 
 const String FirmwareVer = {"4.0"};
 #define URL_fw_Version "https://raw.githubusercontent.com/Sthira-Nusantara/iot-sonoff-firmware/master/version.txt"
-#define URL_fw_Bin "https://raw.githubusercontent.com/Sthira-Nusantara/iot-sonoff-firmware/master/sonoff_d1r1.bin"
+#define URL_fw_Bin "https://raw.githubusercontent.com/Sthira-Nusantara/iot-sonoff-firmware/master/firmware.bin"
 
 String URL_register = "https://api.rupira.com/v1/iot/request";
 const char *mqtt_server = "mqtt.rupira.com";
@@ -35,6 +35,10 @@ String setvalue = prefix + "/setvalue";
 String lastmode = prefix + "/lastmode";
 String correctionmode = prefix + "/correct";
 String update = prefix + "/update";
+String restart = prefix + "/restart";
+String testSubs = prefix + "/test";
+String checkConnection = prefix + "/check";
+String yesConnect = prefix + "/yesConnect";
 
 const long utcOffsetInSeconds = 25200;
 
@@ -45,6 +49,89 @@ WiFiClient espClient;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 PubSubClient client(espClient);
+
+
+void FirmwareUpdate()
+{
+  Serial.println("Preparing update firmware");
+
+  if ((WiFi.status() == WL_CONNECTED))
+  {
+
+    deviceClient.setInsecure();
+
+    //    deviceClient.addHeader("Authorization", "Bearer affd6c0995d4b701ce6e67b2531eb368177f3e7f");
+
+    HTTPClient https;
+
+    Serial.print("[HTTPS] begin...\n");
+    if (https.begin(deviceClient, URL_fw_Version))
+    { // HTTPS
+      //      https.addHeader("Authorization", "Bearer affd6c0995d4b701ce6e67b2531eb368177f3e7f");
+
+      Serial.print("[HTTPS] GET...\n");
+      // start connection and send HTTP header
+      int httpCode = https.GET();
+
+      // httpCode will be negative on error
+      if (httpCode > 0)
+      {
+        // HTTP header has been send and Server response header has been handled
+        Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
+
+        // file found at server
+        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
+        {
+          String payload = https.getString();
+          payload.trim();
+
+          Serial.print("Latest Version: ");
+          Serial.println(payload);
+
+          if (payload.equals(FirmwareVer))
+          {
+            Serial.println("Device already on latest firmware version");
+          }
+          else
+          {
+            Serial.println("New firmware detected");
+            ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
+
+            Serial.println("Device ready to update");
+
+            t_httpUpdate_return ret = ESPhttpUpdate.update(deviceClient, URL_fw_Bin);
+
+            switch (ret)
+            {
+            case HTTP_UPDATE_FAILED:
+              Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+              break;
+
+            case HTTP_UPDATE_NO_UPDATES:
+              Serial.println("HTTP_UPDATE_NO_UPDATES");
+              break;
+
+            case HTTP_UPDATE_OK:
+              Serial.println("Update Done well");
+              Serial.println("HTTP_UPDATE_OK");
+              break;
+            }
+          }
+        }
+      }
+      else
+      {
+        Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
+      }
+
+      https.end();
+    }
+    else
+    {
+      Serial.printf("[HTTPS] Unable to connect\n");
+    }
+  }
+}
 
 void callback(char *topic, byte *payload, unsigned int length)
 {
@@ -110,6 +197,22 @@ void callback(char *topic, byte *payload, unsigned int length)
         client.publish(setvalue.c_str(), JSON);
       }
     }
+  }
+
+  if (strcmp(topic, update.c_str()) == 0)
+  {
+    Serial.println("Checking firmware update");
+    FirmwareUpdate();
+  }
+
+  if (strcmp(topic, restart.c_str()) == 0)
+  {
+    ESP.restart();
+  }
+
+  if (strcmp(topic, checkConnection.c_str()) == 0)
+  {
+    client.publish(yesConnect.c_str(), "1");
   }
 
   Serial.println();
@@ -298,88 +401,6 @@ boolean reconnect()
   }
 
   return client.connected();
-}
-
-void FirmwareUpdate()
-{
-  Serial.println("Preparing update firmware");
-
-  if ((WiFi.status() == WL_CONNECTED))
-  {
-
-    deviceClient.setInsecure();
-
-    //    deviceClient.addHeader("Authorization", "Bearer affd6c0995d4b701ce6e67b2531eb368177f3e7f");
-
-    HTTPClient https;
-
-    Serial.print("[HTTPS] begin...\n");
-    if (https.begin(deviceClient, URL_fw_Version))
-    { // HTTPS
-      //      https.addHeader("Authorization", "Bearer affd6c0995d4b701ce6e67b2531eb368177f3e7f");
-
-      Serial.print("[HTTPS] GET...\n");
-      // start connection and send HTTP header
-      int httpCode = https.GET();
-
-      // httpCode will be negative on error
-      if (httpCode > 0)
-      {
-        // HTTP header has been send and Server response header has been handled
-        Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
-
-        // file found at server
-        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
-        {
-          String payload = https.getString();
-          payload.trim();
-
-          Serial.print("Latest Version: ");
-          Serial.println(payload);
-
-          if (payload.equals(FirmwareVer))
-          {
-            Serial.println("Device already on latest firmware version");
-          }
-          else
-          {
-            Serial.println("New firmware detected");
-            ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
-
-            Serial.println("Device ready to update");
-
-            t_httpUpdate_return ret = ESPhttpUpdate.update(deviceClient, URL_fw_Bin);
-
-            switch (ret)
-            {
-            case HTTP_UPDATE_FAILED:
-              Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-              break;
-
-            case HTTP_UPDATE_NO_UPDATES:
-              Serial.println("HTTP_UPDATE_NO_UPDATES");
-              break;
-
-            case HTTP_UPDATE_OK:
-              Serial.println("Update Done well");
-              Serial.println("HTTP_UPDATE_OK");
-              break;
-            }
-          }
-        }
-      }
-      else
-      {
-        Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
-      }
-
-      https.end();
-    }
-    else
-    {
-      Serial.printf("[HTTPS] Unable to connect\n");
-    }
-  }
 }
 
 void setup()
