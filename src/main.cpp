@@ -10,7 +10,7 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 
-const String FirmwareVer = {"4.2"};
+const String FirmwareVer = {"4.3"};
 #define URL_fw_Version "https://raw.githubusercontent.com/Sthira-Nusantara/iot-sonoff-firmware/master/version.txt"
 #define URL_fw_Bin "https://raw.githubusercontent.com/Sthira-Nusantara/iot-sonoff-firmware/master/firmware.bin"
 
@@ -386,6 +386,8 @@ boolean reconnect()
 
       // //      Your Subs
       client.subscribe(pinmode.c_str());
+      client.subscribe(restart.c_str());
+      client.subscribe(update.c_str());
       client.subscribe(trigger.c_str());
       client.subscribe(correctionmode.c_str());
     }
