@@ -8,9 +8,9 @@
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 #include <WiFiUdp.h>
-#include <NTPClient.h>
+// #include <NTPClient.h>
 
-const String FirmwareVer = {"4.3"};
+const String FirmwareVer = {"4.4"};
 #define URL_fw_Version "https://raw.githubusercontent.com/Sthira-Nusantara/iot-sonoff-firmware/master/version.txt"
 #define URL_fw_Bin "https://raw.githubusercontent.com/Sthira-Nusantara/iot-sonoff-firmware/master/firmware.bin"
 
@@ -40,14 +40,14 @@ String testSubs = prefix + "/test";
 String checkConnection = prefix + "/check";
 String yesConnect = prefix + "/yesConnect";
 
-const long utcOffsetInSeconds = 25200;
+// const long utcOffsetInSeconds = 25200;
 
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+// char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 WiFiClientSecure deviceClient;
 WiFiClient espClient;
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
+// WiFiUDP ntpUDP;
+// NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 PubSubClient client(espClient);
 
 void FirmwareUpdate()
@@ -449,47 +449,47 @@ void loop()
     setup_wifi();
   }
 
-  timeClient.update();
+  // timeClient.update();
 
-  int thisHour = timeClient.getHours();
-  int thisMinute = timeClient.getMinutes();
-  int thisSecond = timeClient.getSeconds();
+  // int thisHour = timeClient.getHours();
+  // int thisMinute = timeClient.getMinutes();
+  // int thisSecond = timeClient.getSeconds();
 
-  if (thisHour == 0 && thisMinute == 1 && thisSecond == 0)
-  {
-    Serial.println("Checking firmware update");
-    FirmwareUpdate();
-  }
+  // if (thisHour == 0 && thisMinute == 1 && thisSecond == 0)
+  // {
+  //   Serial.println("Checking firmware update");
+  //   FirmwareUpdate();
+  // }
 
-  if (thisHour == 1 && thisMinute == 1 && thisSecond == 0)
-  {
-    Serial.println("Checking firmware update");
-    FirmwareUpdate();
-  }
+  // if (thisHour == 1 && thisMinute == 1 && thisSecond == 0)
+  // {
+  //   Serial.println("Checking firmware update");
+  //   FirmwareUpdate();
+  // }
 
-  if (thisHour == 2 && thisMinute == 1 && thisSecond == 0)
-  {
-    Serial.println("Checking firmware update");
-    FirmwareUpdate();
-  }
+  // if (thisHour == 2 && thisMinute == 1 && thisSecond == 0)
+  // {
+  //   Serial.println("Checking firmware update");
+  //   FirmwareUpdate();
+  // }
 
-  if (thisHour == 19 && thisMinute == 1 && thisSecond == 0)
-  {
-    Serial.println("Checking firmware update");
-    FirmwareUpdate();
-  }
+  // if (thisHour == 19 && thisMinute == 1 && thisSecond == 0)
+  // {
+  //   Serial.println("Checking firmware update");
+  //   FirmwareUpdate();
+  // }
 
-  if (thisHour == 20 && thisMinute == 1 && thisSecond == 0)
-  {
-    Serial.println("Checking firmware update");
-    FirmwareUpdate();
-  }
+  // if (thisHour == 20 && thisMinute == 1 && thisSecond == 0)
+  // {
+  //   Serial.println("Checking firmware update");
+  //   FirmwareUpdate();
+  // }
 
-  if (thisHour == 21 && thisMinute == 1 && thisSecond == 0)
-  {
-    Serial.println("Checking firmware update");
-    FirmwareUpdate();
-  }
+  // if (thisHour == 21 && thisMinute == 1 && thisSecond == 0)
+  // {
+  //   Serial.println("Checking firmware update");
+  //   FirmwareUpdate();
+  // }
 
   if (!client.connected())
   {
