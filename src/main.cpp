@@ -10,7 +10,7 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 
-const String FirmwareVer = {"4.1"};
+const String FirmwareVer = {"4.2"};
 #define URL_fw_Version "https://raw.githubusercontent.com/Sthira-Nusantara/iot-sonoff-firmware/master/version.txt"
 #define URL_fw_Bin "https://raw.githubusercontent.com/Sthira-Nusantara/iot-sonoff-firmware/master/firmware.bin"
 
@@ -432,26 +432,6 @@ void setup()
   setup_wifi();
 
   FirmwareUpdate();
-
-  pinMode(0, OUTPUT);
-  pinMode(2, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(5, OUTPUT);
-  pinMode(12, OUTPUT);
-  pinMode(13, OUTPUT);
-  pinMode(14, OUTPUT);
-  pinMode(15, OUTPUT);
-  pinMode(16, OUTPUT);
-
-  digitalWrite(0, HIGH);
-  digitalWrite(2, HIGH);
-  digitalWrite(4, HIGH);
-  digitalWrite(5, HIGH);
-  digitalWrite(12, HIGH);
-  digitalWrite(13, HIGH);
-  digitalWrite(14, HIGH);
-  digitalWrite(15, HIGH);
-  digitalWrite(16, HIGH);
 
   registerDevice();
 
